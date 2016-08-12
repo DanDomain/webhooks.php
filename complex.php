@@ -28,6 +28,9 @@ foreach($eventArray as $event) {
             $newProductNumber = $event['NewValues']['ObjectIdentifier'];
 
             
+        } else {
+            //this should not happen, so throw an error.
+            throw new Exception('Could not determine from the event what type of operation was performed on the object.')
         }
     }
 
