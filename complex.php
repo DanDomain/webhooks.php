@@ -7,7 +7,7 @@ $incomingJsonString = file_get_contents('php://input');
 $eventArray = json_decode($incomingJsonString, true);
 
 $offset = 0;
-foreach($eventArray as $item) {
+foreach($eventArray as $key => $item) {
 
     $offset++;
 
@@ -25,7 +25,6 @@ foreach($eventArray as $item) {
                 "Product deleted with product number $productNumber",
                 $offset);
 
-            
         } else if($item['NewValues'] !== null && $item['OldValues'] === null) {
             //product was created.
             $productNumber = $item['NewValues']['ObjectIdentifier'];
@@ -50,7 +49,7 @@ foreach($eventArray as $item) {
             
         } else {
             //this should not happen, so throw an error.
-            throw new Exception('Could not determine from the event what type of operation was performed on the object.')
+            throw new Exception('Could not determine from the event what type of operation was performed on the object.');
         }
     }
 
@@ -62,7 +61,7 @@ function get_event_data(
 {
     $data = '';
 
-    foreach($propertiesChanged as $propertyChanged) {
+    foreach($propertiesChanged as $key => $propertyChanged) {
         $value = $values[$propertyChanged];
 
         $data = $data . "$propertyChanged: \"$value\"\r\n";
@@ -75,7 +74,8 @@ function get_event_data(
 function get_event_change_data($item) {
     $data = '';
     
-    foreach($propertiesChanged as $propertyChanged) {
+    $propertiesChanged = $item['PropertiesChanged'];
+    foreach($propertiesChanged as $key => $propertyChanged) {
         $oldValue = $item['OldValues'][$propertyChanged];
         $newValue = $item['NewValues'][$propertyChanged];
 
@@ -91,7 +91,11 @@ function write_to_file(
     $title,
     $offset) 
 {
-    $file = fopen("event_$offset.txt", "w") or throw new Exception('Could not write to file.');
+    $file = fopen("event_$offset.txt", "w");
+    if(!$file) {
+        throw new Exception('Could not write to file.');
+    }
+
     fwrite($file, $title);
     fwrite($file, "\r\n");
     fwrite($file, $content);
